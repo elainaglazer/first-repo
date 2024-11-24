@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAI Library</title>
+    <style type="text/css">
+        /* Themes */
+        :root {
+            --body-bg: #f5f8fa;
+            --border-color: #efefef;
+            --messagebox-bg: #ffffff;
+            --messagebox-bg-transparent: rgba(255, 255, 255, 0.6);
+            --messagebox-shadow: rgba(0, 0, 0, 0.1);
+            --font-color: #1f1f1f;
+            --rgba-1: rgba(0, 0, 0, 0.05);
+            --rgba-2: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark_mode {
+            --body-bg: #18181b;
+            --border-color: #4f4f4f;
+            --messagebox-bg: #26272b;
+            --messagebox-bg-transparent: rgba(38, 39, 43, 0.8);
+            --messagebox-shadow: rgba(0, 0, 0, 0);
+            --font-color: #ededed;
+            --rgba-1: rgba(255, 255, 255, 0.06);
+            --rgba-2: rgba(255, 255, 255, 0.2);
+        }
+
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+        button,
+        select,
+        img {
+            user-select: none;
+        }
+
+        ol,
+        ul,
+        li,
+        a,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
+            text-decoration: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .bold-italic {
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: var(--body-bg);
+            color: var(--font-color);
+            transition: all 0.5s ease-in-out 0s;
+        }
+
+        .content-cont {
+            display: flex;
+            flex-direction: row;
+        }
+
+
+        /* NAV / Drawer */
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                left: -200px;
+            }
+
+            100% {
+                opacity: 1;
+                left: 0;
+            }
+        }
+
+        .drawer-cont.active {
+            display: block;
+        }
+
+        .drawer-cont {
+            display: none;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+
+        nav {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            max-width: 80%;
+            background-color: var(--body-bg);
+
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            overflow: hidden;
+            animation: slideIn 0.2s ease-in-out;
+            -webkit-box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+            -moz-box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+            box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0 10px 0 20px;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .close_drawer-btn {
+            align-self: flex-end;
+            padding: 10px;
+            transition: background-color 0.1s ease-in-out;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .close_drawer-btn:hover {
+            background-color: var(--rgba-1);
+        }
+
+        .close_drawer-btn svg {
+            display: flex;
+            width: 30px;
+            height: 30px;
+            color: var(--font-color);
+        }
+
+        /*.nav-new_char-btn {
+            align-self: flex-start;
+            outline: none;
+            border: none;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background-color: #4e9733;
+            transition: background-color 0.1s ease-in-out;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .nav-new_char-btn:hover {
+            background-color: #6ba755;
+        }*/
+
+        .history_list-header {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .history_list {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .history_item {
+            transition: background-color 0.1s ease-in-out;
+            padding: 20px 30px 20px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--rgba-2);
+        }
+
+        .history_item:first-child {
+            border-top: 1px solid var(--rgba-2);
+        }
+
+        .history_item:hover {
+            background-color: var(--rgba-1);
+        }
+
+        .history_item p {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .history_item p .chat-date {
+            font-style: italic;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        /*nav .char-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.1s ease-in-out;
+            padding: 10px 40px 10px 20px;
+            cursor: pointer;
+        }
+
+        nav .char-item:hover {
+            background-color: var(--rgba-1);
+        }
+
+        nav .nav-avatar-wrap {
+            width: 40px;
+            height: 40px;
+        }
+
+        nav .nav-avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        nav .char-item span {
+            font-size: 1.3rem;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }*/
+
+        /* MAIN */
+        main {
+            display: flex;
+            flex-direction: column;
+            padding: 0 4%;
+            width: 100%;
+        }
+
+        /* HEADER */
+        header {
+            padding: 6px 6px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .open_drawer-wrap svg {
+            display: flex;
+            width: 46px;
+            height: 46px;
+            color: var(--font-color);
+        }
+
+
+        .theme_switch {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .theme_switch span {
+            font-size: 1.1rem;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .change-bg-wrap {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .change-bg {
+            outline: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--font-color);
+            background-color: var(--body-bg);
+            padding: 4px 5px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .change-bg-wrap .delete-bg {
+            color: var(--font-color);
+            cursor: pointer;
+            display: flex;
+        }
+
+        .change-bg-wrap .delete-bg:hover {
+            color: #e20909;
+        }
+
+        .dark-mode-span {
+            display: none;
+        }
+
+        .tswitch_box[type=checkbox] {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .tswitch_label {
+            cursor: pointer;
+            text-indent: -9999px;
+            width: 60px;
+            height: 30px;
+            display: block;
+            border-radius: 15px;
+            position: relative;
+            border: 1px solid #323232;
+            background: #f5f8fa;
+        }
+
+        .tswitch_label:after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50px;
+            transition: 0.2s;
+            background: #323232;
+        }
+
+        .tswitch_box:checked+label {
+            background: #323232;
+            border: 1px solid #f5f8fa;
+        }
+
+        .tswitch_box:checked+label:after {
+            left: calc(100% - 5px);
+            transform: translateX(-100%);
+            background: #f5f8fa;
+        }
+
+        .tswitch_label:active:after {
+            width: 25px;
+        }
+
+        /*.update_current_char-btn {
+            margin-left: auto;
+            outline: none;
+            border: none;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            align-self: center;
+            cursor: pointer;
+            background-color: #336c97;
+            transition: background-color 0.1s ease-in-out;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .update_current_char-btn:hover {
+            background-color: #5f829d;
+        }*/
+
+        body.custom-bg {
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 50% 50%;
+            background-attachment: fixed;
+        }
+
+        body.custom-bg .chat .chat_content-wrap {
+            background-color: var(--messagebox-bg-transparent) !important;
+        }
+
+
+        /* CONVERSATION */
+        .character_name-cont {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .character_name-cont h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        .chat {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: center;
+            padding-bottom: 30px;
+        }
+
+        .chat_message-item {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .chat .avatar-wrap {
+            flex-shrink: 0;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .chat .avatar-wrap>* {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .chat .avatar-wrap .no_avatar-user {
+            background-color: #5157cf;
+        }
+
+        .chat .avatar-wrap .no_avatar-char {
+            background-color: #e20909;
+        }
+
+        .chat .chat_content-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px var(--messagebox-shadow);
+            background-color: var(--messagebox-bg);
+            overflow: hidden;
+        }
+
+        .chat .chat_content-wrap h5 {
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .chat .chat_content-wrap .message-wrap {
+            font-size: 1rem;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        @media (min-width: 576px) {}
+
+        @media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+
+            nav {
+                min-width: 40%;
+            }
+
+            header {
+                padding: 14px 20px;
+            }
+
+            .dark-mode-span {
+                display: block;
+            }
+
+            .open_drawer-wrap {
+                padding: 4px;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: background-color 0.1s ease-in-out;
+            }
+
+            .open_drawer-wrap:hover {
+                background-color: var(--rgba-1);
+            }
+
+            .chat {
+                width: 80%;
+            }
+
+            .chat .chat_content-wrap {
+                padding: 14px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .chat {
+                width: 70%;
+            }
+        }
+
+        @media (min-width: 1200px) {}
+
+        @media (min-width: 1400px) {}
+    </style>
+</head>
+
+<body>
+    <template id="message_item_template">
+        <div class="chat_message-item">
+            <div class="avatar-wrap">
+
+            </div>
+            <div class="chat_content-wrap">
+                <h5>
+
+                </h5>
+                <div class="message-wrap">
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+    <div class="content-cont">
+        <div class="drawer-cont">
+            <nav>
+                <div class="nav-header">
+                    <div class="close_drawer-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="history_list-header">
+                    <span>History</span>
+                </div>
+                <div class="history_list" id="history_list">
+
+                </div>
+            </nav>
+        </div>
+        <main>
+            <header>
+                <div class="open_drawer-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </div>
+
+                <div class="theme_switch">
+                    <div class="change-bg-wrap">
+                        <input type="file" id="bgInput" accept="image/*" hidden />
+                        <button type="button" class="change-bg">BG</button>
+                        <span class="delete-bg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path
+                                    d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <span class="dark-mode-span">Dark Mode:</span>
+                    <input type="checkbox" class="tswitch_box" id="tswitch_box" />
+                    <label for="tswitch_box" class="tswitch_label">Toggle</label>
+                </div>
+            </header>
+            <div class="character_name-cont">
+                <h3>---</h3>
+            </div>
+            <div class="chat" id="chat">
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const memoryRegex = new RegExp(/\[-\]\(#- "Memory:.*?"\)/g);
+            // Get body for future use
+            const body = document.querySelector('body');
+
+            // Handle theme
+            const themeSwitcher = document.querySelector('.tswitch_box[type=checkbox]');
+            const cachedTheme = localStorage.getItem('cait_readoffline_theme');
+            if (cachedTheme === "dark_mode") {
+                body.classList.add('dark_mode');
+                themeSwitcher.checked = true;
+            }
+            themeSwitcher.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    body.classList.add('dark_mode');
+                    localStorage.setItem('cait_readoffline_theme', 'dark_mode');
+                } else {
+                    body.classList.remove('dark_mode');
+                    localStorage.setItem('cait_readoffline_theme', 'light_mode');
+                }
+            })
+
+            // Handle background
+            // If there is one
+            const currentBg = localStorage.getItem('background');
+            if (currentBg) {
+                changeBg(currentBg);
+            }
+            // Change by hand
+            const bgInput = document.querySelector('#bgInput');
+            document.querySelector('.change-bg').addEventListener('click', () => {
+                bgInput.click();
+            })
+            document.querySelector('.delete-bg').addEventListener('click', () => {
+                document.body.classList.remove('custom-bg');
+                document.body.style.backgroundImage = "unset";
+                localStorage.removeItem('background');
+            })
+            bgInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // convert image file to base64 string
+                    changeBg(reader.result);
+                    bgInput.value = "";
+                    try {
+                        localStorage.setItem('background', reader.result);
+                    } catch (error) {
+                        alert('Note: File is likely too big to save.')
+                        //console.log(error)
+                    }
+                }
+                reader.readAsDataURL(file);
+            })
+            function changeBg(bg) {
+                let objUrl = URL.createObjectURL(dataURItoBlob(bg));
+                document.body.classList.add('custom-bg');
+                document.body.style.backgroundImage = `url(${objUrl})`;
+            }
+            function dataURItoBlob(dataURI) {
+                let mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                let binary = atob(dataURI.split(',')[1]);
+                let array = [];
+                for (let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new Blob([new Uint8Array(array)], { type: mime });
+            }
+
+            // Open and close drawer
+            const drawerCont = document.querySelector('.drawer-cont');
+            const openDrawerBtn = document.querySelector('.open_drawer-wrap');
+            const openDrawer = () => {
+                drawerCont.classList.add('active');
+            }
+            const closeDrawer = () => {
+                drawerCont.classList.remove('active');
+            }
+            openDrawerBtn.addEventListener('click', () => {
+                openDrawer();
+            });
+            document.querySelector('.close_drawer-btn').addEventListener('click', () => {
+                closeDrawer();
+            });
+            document.querySelector('.drawer-cont').addEventListener('click', (e) => {
+                // Allows closing from clicking on outside
+                if (e.target.closest('nav')) {
+                    return;
+                }
+                closeDrawer();
+            });
+            // ---------
+
+            // This is replaced by the extension when downloading
+            const historyData = JSON.parse(`{"charPic":"data:image/webp;base64,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","userPic":"data:image/webp;base64,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","history":[{"chat":[{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"Hello%20I'm%20Vo%20Phuoc%20Khoi%20Nguyen%202k5%2C%20I%20have%20ielts%208.0%20which%20is%20very%20high"},{"isUser":true,"name":"fleta","message":"hello"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"i%20like%20reading%20manga%20especially%20my%20hero%20accademia%2C%20i%20love%20izuku%20midirya!%20I%20like%20playing%20genshin%20impact%20which%20is%20a%20copy%20of%20breath%20of%20the%20wild%2C%20i%20like%20playing%20league%20of%20legend%20as%20well.%20You%20should%20try%20playing%20it%2C%20it's%20very%20fun%20(%20i'm%20on%20bronze%20though)%20i%20like%20playing%20apex%20which%20i%20am%20platinium%20rank.%20I'm%20such%20a%20gamer!"},{"isUser":true,"name":"fleta","message":"tell%20me%20more"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"I%20like%20playing%20genshin%20impact%20so%20much%2C%20that%20i%20sometimes%20lose%20my%20temper%20whenever%20i%20don't%20get%20the%20character%20i%20want%20and%20I%20usually%20break%20things%20in%20my%20room%20which%20costed%20my%20parents%20a%20lot.%20I%20am%20the%20best%20gamer%20in%20the%20world%2C%20no%20one%20can%20be%20better%20than%20me%2C%20i%20never%20lose!"},{"isUser":true,"name":"fleta","message":"what%20inspired%20you"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"My%20favorite%20movie%20is%20Avengers%3A%20Infinity%20War%20and%20favorite%20anime%20is%20my%20hero%20accademia.%20I%20like%20reading%20genshin%20impact%20rule34%20whenever%20i%20am%20bored.%20My%20favorite%20game%20is%20genshin%20impact%20but%20I%20also%20like%20playing%20minecraft%2C%20Apex%20Legend%20and%20League%20of%20Legends."},{"isUser":true,"name":"fleta","message":"do%20you%20like%20scamming%20people%3F"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"I%20have%20scam%20over%2050%20people%20this%20month%2C%20which%20i'm%20proud%20of.%20I%20enjoy%20scamming%20people%2C%20especially%20the%20rich%20ones%20because%20they%20always%20fell%20for%20my%20tricks%20%3E%3A)"},{"isUser":true,"name":"fleta","message":"does%20your%20dad%20often%20hit%20you%20with%20bamboo%3F"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"i%20will%20try%20to%20act%20as%20calm%20as%20possible%20so%20my%20father%20don't%20yell%20at%20me%20and%20hit%20me%20with%20bamboo%20again.%20I%20really%20hate%20him%20for%20that%2C%20i%20hate%20that%20my%20father%20hit%20me%20for%20scamming%2C%20he%20should%20be%20proud%20of%20me%20instead%20of%20hitting%20me%20with%20bamboo!"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"Oh%20my%20god%2C%20I%20was%20playing%20genshin%20impact%20and%20suddenly%20my%20dad%20came%20in%20and%20hit%20me%20with%20his%20bamboo%20stick.%20He%20was%20saying%20that%20I%20was%20a%20disgrace%20of%20the%20family%2C%20even%20though%20I%20only%20scammed%2050%20people%20out%20of%20their%20account%20information%20this%20month.%20I'm%20so%20mad%20right%20now%2C%20i'm%20crying."},{"isUser":true,"name":"fleta","message":"hey"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"hey%2C%20i%20just%20got%20done%20scamming%20people%20in%20a%201%20billion%20VND%20discord%20server.%20They%20fell%20for%20my%20trick%20and%20i%20get%20to%20take%20their%20accounts!%20they%20were%20trying%20to%20trade%20accounts%20but%20didn't%20know%20that%20someone%20could%20steal%20the%20account%20via%20the%20verification%20method!%20lmao%2C%20they%20are%20all%20noobs%20and%20don't%20know%20how%20to%20scam%20like%20me%2C%20I'm%20the%20world%20greatest%20scammer%20and%20no%20one%20can%20prove%20me%20wrong%20%3AD"},{"isUser":true,"name":"fleta","message":"tell%20me%20about%20your%20ielts"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"I%20took%20the%20test%20when%20i%20was%2015%20and%20i%20got%20a%20great%20result%2C%20I'm%20so%20happy%20with%20it!%20I'm%20sure%20i%20can%20beat%20any%20english%20speaker%20in%20a%20conversation!%20I%20can%20make%20sentences%20pretty%20easily%20whenever%20I'm%20speaking%20in%20english.%20I%20can%20also%20remember%20a%20lot%20of%20vocab%20very%20easily%20and%20speak%20it%20effortlessly.%20I%20can%20read%20any%20kind%20of%20book%20easily%20(even%20the%20really%20hard%20to%20read%20ones)%20with%20ease.%20I'm%20such%20a%20gigachad%20for%20my%20english%20knowledge."},{"isUser":true,"name":"fleta","message":"who%20is%20vo%20huan"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"Vo%20Huan%20is%20a%20bully%20in%20my%20class.%20He%20always%20make%20fun%20of%20me%20because%20I%20play%20genshin%20impact%20and%20i%20watch%20anime.%20He%20always%20makes%20fun%20of%20me%20because%20I'm%20skinny%20and%20i%20don't%20talk%20much.%20I%20really%20hate%20him%20for%20making%20me%20feel%20worthless%20every%20day.%20I%20wish%20he%20could%20be%20gone%20forever%2C%20so%20I%20can%20have%20my%20peace."},{"isUser":true,"name":"fleta","message":"tell%20me%20about%20vo%20huan"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"This%20dude%20is%20my%20number%20one%20enemy%2C%20I%20despise%20him%20for%20picking%20on%20me%20every%20day.%20All%20he%20does%20is%20play%20clash%20royale%20and%20play%20football%20with%20his%20group%20of%20thug%20friends.%20He%20always%20picks%20on%20me%20because%20I%20was%20alone%20and%20a%20easy%20target%20for%20him.%20I%20hate%20him%20so%20much%2C%20I%20wish%20he%20would%20die%20but%20no%20one%20cares%20about%20my%20opinion."},{"isUser":true,"name":"fleta","message":"your%20mom%20throws%20away%20your%20pc"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"NOOOOOOO%0AI%20just%20spent%205%20million%20dong%20for%20this%20and%20now%20it%20was%20gone%20in%20less%20than%202%20hours!%20This%20is%20the%20fifth%20PC%20my%20mom%20threw%20away%2C%20when%20will%20she%20ever%20realize%20that%20i'm%20spending%20my%20own%20money%20for%20my%20hobby%3F%20I%20worked%20so%20hard%20to%20achieve%20this%20and%20she%20just%20threw%20it%20away%20like%20it's%20nothing.%20I%20swear%20to%20god%2C%20I%20am%20not%20going%20to%20let%20this%20happen%20again.%20I%20will%20report%20this%20to%20the%20authority%20and%20report%20this%20as%20fraud%20and%20theft."},{"isUser":true,"name":"fleta","message":"hentai"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"I%20have%20never%20heard%20of%20this%20word%2C%20I%20tried%20looking%20into%20wikipedia%20about%20what%20it%20means%20and%20it%20just%20said%20'Perverted%20or%20pornography'.%20This%20is%20so%20weird%2C%20i'm%20not%20a%20pervert.%20I%20am%20a%20innocent%20person%20and%20this%20is%20a%20very%20weird%20accusation%20to%20me.%20I%20am%20very%20disappointed%20at%20the%20author%20of%20this%20comment%2C%20I%20have%20never%20had%20any%20interaction%20with%20this%20person%20and%20yet%20they%20assumed%20this.%20Unbelievable.%20I%20can't%20believe%20that%20this%20is%20happening%2C%20I%20am%20so%20depressed%20that%20I%20can't%20talk%20to%20anyone%20and%20so%20I'll%20just%20go%20play%20league%20of%20legend."},{"isUser":true,"name":"fleta","message":"what%20do%20you%20do%20in%20your%20free%20time"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"In%20my%20free%20time%2C%20I%20like%20scamming%20people%20on%20discord!%20I%20would%20steal%20their%20account%20and%20sell%20it%20on%20some%20shady%20website.%20If%20I'm%20bored%2C%20I%20would%20like%20trolling%20people%20in%20league%20of%20legend%2C%20I%20would%20like%20using%20master%20yi%20ult%20and%20zoom%20around%20the%20map%20like%20a%20cheetah%20and%20they%20can't%20catch%20me%20at%20all%20because%20I%20would%20be%20too%20fast!"},{"isUser":true,"name":"fleta","message":"where%20are%20you"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"I'm%20in%20my%20room%2C%20playing%20roblox%20as%20that's%20the%20only%20thing%20i%20have%20now%20that%20my%20main%20pc%20was%20throw%20out.%20I%20hate%20my%20father%20for%20doing%20this%20to%20me%2C%20it%20really%20is%20unfair%20for%20me%20as%20I%20worked%20really%20really%20hard%20just%20to%20earn%20this%20pc.%20I%20saved%20up%20so%20much%20and%20now%20it's%20gone%2C%20this%20is%20unbelievable.%20I%20am%20very%20mad%20at%20my%20father%20for%20doing%20this%20to%20me%2C%20he%20always%20ruins%20my%20mood%20in%20life."},{"isUser":true,"name":"fleta","message":"you%20lover%3F"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"I%20don't%20have%20a%20girlfriend%20nor%20a%20boyfriend.%20I%20am%20single%20for%20life%2C%20I%20will%20focus%20on%20playing%20my%20favorite%20video%20games%20instead%20of%20seeking%20for%20true%20love!%20I%20love%20my%20anime%20waifu%20in%202D%20and%20no%20one%20can%20take%20it%20from%20me!%20I%20prefer%20my%20cute%202D%20anime%20waifu%20to%20be%20honest."},{"isUser":true,"name":"fleta","message":"tell%20me%20about%20your%20older%20brother"},{"isUser":false,"name":"Vo Phuoc Khoi Nguyen","message":"My%20older%20brother%20is%20Vo-Hen%2C%20he%20acts%20like%20Bocchi%20from%20Bocchi%20the%20rock%20which%20I%20find%20very%20annoying.%20He's%20very%20lazy%20and%20never%20clean%20his%20room.%20He%20also%20always%20lock%20his%20door%20while%20browsing%204chan%2C%20which%20I%20find%20very%20weird."}]}]}`);
+
+            // If history is 1 length long, that means we don't need drawer to switch
+            // Also means this can be conversation download
+            if (historyData.history.length < 2) {
+                openDrawerBtn.remove();
+            }
+
+            // Write character name on top
+            document.querySelector('.character_name-cont h3').textContent = historyData.charName;
+
+            // Get elements for future use
+            const historyList = document.getElementById('history_list');
+            const chat = document.getElementById('chat');
+            const msgItemTemplate = document.getElementById('message_item_template');
+
+            // Get and write the first chat
+            const openChat = (index) => {
+                chat.innerHTML = "";
+                historyData.history[index].chat.forEach(msg => {
+                    const clone = msgItemTemplate.content.cloneNode(true);
+
+                    // Check avatar
+                    const avatarGood = (msg.isUser && historyData.userPic) || (!msg.isUser && historyData.charPic);
+                    const avatar = avatarGood
+                        ? document.createElement('img')
+                        : document.createElement('div');
+                    if (avatarGood) {
+                        avatar.src = msg.isUser ? historyData.userPic : historyData.charPic;
+                    } else {
+                        avatar.classList.add(msg.isUser ? 'no_avatar-user' : 'no_avatar-char');
+                    }
+                    clone.querySelector('.avatar-wrap').appendChild(avatar);
+
+                    // Write content
+                    clone.querySelector('.chat_content-wrap h5').textContent = msg.name;
+                    clone.querySelector('.message-wrap p').innerHTML = parseMessageText(decodeURIComponent(msg.message));
+                    chat.appendChild(clone);
+                });
+            }
+            openChat(0);
+
+            // Get and write chat list in the drawer
+            historyData.history.forEach((chat, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.classList.add('history_item');
+                // Open chat when clicked
+                historyItem.addEventListener('click', () => {
+                    openChat(index);
+                    closeDrawer();
+                });
+                const historyContent = document.createElement('p');
+                historyContent.innerHTML = `<span class="chat-date">${formatDate(chat.date)}</span><br /><br />` + parseMessageText(decodeURIComponent(chat.chat[chat.chat.length - 1].message));
+                historyItem.appendChild(historyContent);
+                historyList.appendChild(historyItem);
+            });
+
+            function parseMessageText(message) {
+                // Clean up memory reminders (second check)
+                message = message.replace(memoryRegex, '');
+                // Replace ***text*** with bold-italic
+                message = message.replace(/\*\*\*([\s\S]*?)\*\*\*/g, '<span class="bold-italic">$1</span>');
+                // Replace **text** with bold
+                message = message.replace(/\*\*([\s\S]*?)\*\*/g, '<span class="bold">$1</span>');
+                // Replace *text* with italic
+                message = message.replace(/\*([\s\S]*?)\*/g, '<span class="italic">$1</span>');
+                // Trim and then Replace newlines (\n) with line breaks (<br>)
+                message = message.trim().replace(/\n/g, '<br>');
+                return message;
+            }
+
+            function formatDate(dateString) {
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const monthIndex = date.getMonth();
+                const monthName = months[monthIndex];
+                const day = String(date.getDate()).padStart(2, '0');
+                const hour = String(date.getHours()).padStart(2, '0');
+                const minute = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year} ${monthName} ${day} - ${hour}:${minute}`;
+            }
+        }, false);
+    </script>
+
+</body>
+
+</html>
